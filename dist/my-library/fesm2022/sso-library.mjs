@@ -318,7 +318,8 @@ class MyLibraryService {
     constructor(http, cookieStorage) {
         this.http = http;
         this.cookieStorage = cookieStorage;
-        this.baseAPI = 'https://secureauth.secureid-digital.com.ng/api';
+        this.baseAPI = 'https://securepay-staging-api.secureid-digital.com.ng/api';
+        // private baseAPI = 'https://secureauth.secureid-digital.com.ng/api';
         // private baseAPI = environment.baseAPI;
         this.signUpSubject = new Subject();
         this.loginSubject = new Subject();
@@ -367,6 +368,19 @@ class MyLibraryService {
         this.cookieStorage.set('role', role);
         return this.appInit();
     }
+    setupApp(data) {
+        // this.appIsSetup = true;
+        this.cookieStorage.remove('appParams');
+        this.cookieStorage.set('redirectUrl', data.client.redirectUri, data.expiresIn);
+        this.cookieStorage.set('accessToken', data.accessToken, data.expiresIn);
+        this.cookieStorage.set('tokenType', data.tokenType, data.expiresIn);
+        this.appSetupSubject.next({
+            title: 'Success',
+            message: 'Items saved to cookies storage',
+            type: 'success',
+            queryObject: this.queryObject,
+        });
+    }
     appInit() {
         this.http.post(`${this.baseAPI}/auth/get-token`, {}).subscribe({
             next: (res) => {
@@ -392,19 +406,6 @@ class MyLibraryService {
             },
         });
         return this.appSetupSubject.asObservable();
-    }
-    setupApp(data) {
-        // this.appIsSetup = true;
-        this.cookieStorage.remove('appParams');
-        this.cookieStorage.set('redirectUrl', data.client.redirectUri, data.expiresIn);
-        this.cookieStorage.set('accessToken', data.accessToken, data.expiresIn);
-        this.cookieStorage.set('tokenType', data.tokenType, data.expiresIn);
-        this.appSetupSubject.next({
-            title: 'Success',
-            message: 'Items saved to cookies storage',
-            type: 'success',
-            queryObject: this.queryObject,
-        });
     }
     login(payload) {
         // Todo: handle login

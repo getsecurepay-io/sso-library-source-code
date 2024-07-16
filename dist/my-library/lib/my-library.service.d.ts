@@ -24,8 +24,8 @@ export declare class MyLibraryService {
     checkForLowercase(query: string): boolean;
     checkForUppercase(query: string): boolean;
     initializeApp(query: any): Observable<any>;
-    private appInit;
     private setupApp;
+    private appInit;
     login(payload: {
         EmailAddress: string;
         Password: string;
