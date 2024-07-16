@@ -9,7 +9,8 @@ import { environment } from '../environments/environment';
   providedIn: 'root',
 })
 export class MyLibraryService {
-  private baseAPI = 'https://secureauth.secureid-digital.com.ng/api';
+  private baseAPI = 'https://securepay-staging-api.secureid-digital.com.ng/api';
+  // private baseAPI = 'https://secureauth.secureid-digital.com.ng/api';
   // private baseAPI = environment.baseAPI;
   private signUpSubject = new Subject();
   private loginSubject = new Subject();
@@ -34,14 +35,17 @@ export class MyLibraryService {
     const pattern = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
     return pattern.test(query)
   }
+
   checkForDigits(query: string) {
     const pattern = /\d/;
     return pattern.test(query)
   }
+
   checkForLowercase(query: string) {
     const pattern = /[a-z]/;
     return pattern.test(query)
   }
+
   checkForUppercase(query: string) {
     const pattern = /[A-Z]/;
     return pattern.test(query)
@@ -65,6 +69,24 @@ export class MyLibraryService {
     this.cookieStorage.set('appParams', appParams);
     this.cookieStorage.set('role', role);
     return this.appInit();
+  }
+
+  private setupApp(data: AppParams) {
+    // this.appIsSetup = true;
+    this.cookieStorage.remove('appParams');
+    this.cookieStorage.set(
+      'redirectUrl',
+      data.client.redirectUri,
+      data.expiresIn
+    );
+    this.cookieStorage.set('accessToken', data.accessToken, data.expiresIn);
+    this.cookieStorage.set('tokenType', data.tokenType, data.expiresIn);
+    this.appSetupSubject.next({
+      title: 'Success',
+      message: 'Items saved to cookies storage',
+      type: 'success',
+      queryObject: this.queryObject,
+    });
   }
 
   private appInit(): Observable<any> {
@@ -93,24 +115,6 @@ export class MyLibraryService {
     });
 
     return this.appSetupSubject.asObservable();
-  }
-
-  private setupApp(data: AppParams) {
-    // this.appIsSetup = true;
-    this.cookieStorage.remove('appParams');
-    this.cookieStorage.set(
-      'redirectUrl',
-      data.client.redirectUri,
-      data.expiresIn
-    );
-    this.cookieStorage.set('accessToken', data.accessToken, data.expiresIn);
-    this.cookieStorage.set('tokenType', data.tokenType, data.expiresIn);
-    this.appSetupSubject.next({
-      title: 'Success',
-      message: 'Items saved to cookies storage',
-      type: 'success',
-      queryObject: this.queryObject,
-    });
   }
 
   login(payload: { EmailAddress: string; Password: string }) {
