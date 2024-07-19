@@ -74,7 +74,12 @@ export class MyLibraryService {
   }
 
   private appInit(): Observable<any> {
-    this.http.post<AppParams>(`${this.baseAPI}/auth/get-token`, {}).subscribe({
+    const accessToken = this.cookieStorage.get('appParams') || '';
+    let headers = new HttpHeaders();
+    headers = headers.append('Basic', accessToken);
+
+    this.http.post<AppParams>(`${this.baseAPI}/auth/get-token`, {}, { headers })
+    .subscribe({
       next: (res) => {
         if (res) {
           this.setupApp(res);
