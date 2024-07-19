@@ -1,0 +1,6 @@
+[submodule "dist/my-library/sso-angular-library"]
+	path = dist/my-library/sso-angular-library
+	url = https://github.com/getsecurepay-io/sso-angular-library.git
+[submodule "sso-angular-library"]
+	path = sso-angular-library
+	url = https://github.com/getsecurepay-io/sso-angular-library.git
