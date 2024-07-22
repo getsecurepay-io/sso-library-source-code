@@ -22,9 +22,11 @@ export class MyLibraryService {
   private resetPasswordSubject = new Subject<any>();
   private queryObject: any;
 
-  emailValidationRegex = /([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+/
-  passwordValidationRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~])[A-Za-z\d`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]{8,100000}$/
-  phoneNumberValidationRegex = /^0\d{8,10}$/
+  emailValidationRegex =
+    /([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+/;
+  passwordValidationRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~])[A-Za-z\d`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]{8,100000}$/;
+  phoneNumberValidationRegex = /^0\d{8,10}$/;
 
   constructor(
     private http: HttpClient,
@@ -33,25 +35,34 @@ export class MyLibraryService {
 
   checkForSpecialCharacters(query: string) {
     const pattern = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    return pattern.test(query)
+    return pattern.test(query);
   }
 
   checkForDigits(query: string) {
     const pattern = /\d/;
-    return pattern.test(query)
+    return pattern.test(query);
   }
 
   checkForLowercase(query: string) {
     const pattern = /[a-z]/;
-    return pattern.test(query)
+    return pattern.test(query);
   }
 
   checkForUppercase(query: string) {
     const pattern = /[A-Z]/;
-    return pattern.test(query)
+    return pattern.test(query);
   }
 
-  initializeApp(query: {params: string, url: string}): Observable<any> {
+  private get headers(): HttpHeaders {
+    let headers = new HttpHeaders();
+    const accessToken = this.cookieStorage.get(this.cookieStorage.COOKIE_NAME);
+    const tokenType = this.cookieStorage.get('tokenType');
+    headers = headers.append('Authorization', `${tokenType} ${accessToken}`);
+
+    return headers;
+  }
+
+  initializeApp(query: { params: string; url: string }): Observable<any> {
     const queryObject = query;
     this.queryObject = queryObject;
     const appParams = queryObject['params'];
@@ -67,7 +78,7 @@ export class MyLibraryService {
       return this.appSetupSubject.asObservable();
     }
     // const role = queryObject['role'];
-    this.cookieStorage.set('sso', this.baseAPI)
+    this.cookieStorage.set('sso', this.baseAPI);
     this.cookieStorage.set('appParams', appParams);
     // this.cookieStorage.set('role', role);
     return this.appInit();
@@ -78,30 +89,31 @@ export class MyLibraryService {
     let headers = new HttpHeaders();
     headers = headers.append('Basic', accessToken);
 
-    this.http.post<AppParams>(`${this.baseAPI}/auth/get-token`, {}, { headers })
-    .subscribe({
-      next: (res) => {
-        if (res) {
-          this.setupApp(res);
-        }
-        const error = {
-          title: 'No res from api call',
-          message: 'Check backend app',
-          type: 'error',
-          queryObject: this.queryObject || {},
-        };
-        this.appSetupSubject.error(error);
-      },
-      error: (err) => {
-        const error = {
-          title: 'Api Error',
-          message: `Something went wrong, Please refresh the app`,
-          type: 'error',
-          queryObject: this.queryObject || {},
-        };
-        this.appSetupSubject.error(error);
-      },
-    });
+    this.http
+      .post<AppParams>(`${this.baseAPI}/auth/get-token`, {}, { headers })
+      .subscribe({
+        next: (res) => {
+          if (res) {
+            this.setupApp(res);
+          }
+          const error = {
+            title: 'No res from api call',
+            message: 'Check backend app',
+            type: 'error',
+            queryObject: this.queryObject || {},
+          };
+          this.appSetupSubject.error(error);
+        },
+        error: (err) => {
+          const error = {
+            title: 'Api Error',
+            message: `Something went wrong, Please refresh the app`,
+            type: 'error',
+            queryObject: this.queryObject || {},
+          };
+          this.appSetupSubject.error(error);
+        },
+      });
 
     return this.appSetupSubject.asObservable();
   }
@@ -127,10 +139,7 @@ export class MyLibraryService {
   login(payload: { EmailAddress: string; Password: string }) {
     // Todo: handle login
     const encodedData = btoa(JSON.stringify(payload));
-
-    this.cookieStorage.remove('token')
-
-    let headers = new HttpHeaders();
+    let headers = this.headers;
     headers = headers.append('Basic', encodedData);
 
     this.http
@@ -139,7 +148,7 @@ export class MyLibraryService {
         next: (res: LoginData) => {
           if (res['userId']) {
             this.setUserDetails(res);
-            const userData =  (res as LoginData)
+            const userData = res as LoginData;
             this.loginSubject.next(userData);
           } else {
             const errorMessage = res['description'];
@@ -169,44 +178,52 @@ export class MyLibraryService {
   }
 
   signup(payload: any) {
-    this.http.post(`${this.baseAPI}/auth/register`, payload).subscribe({
-      next: (res: any) => {
-        if (res['data']) {
-          this.signUpSubject.next(res);
-        } else {
-          const errorMessage = res['description'];
-          this.signUpSubject.next(errorMessage);
-        }
-      },
-      error: (err: any) => {
-        // scrollTo({ top: 0 });
-        this.signUpSubject.next(err['description']);
-      },
-    });
+    let headers = this.headers;
+    this.http
+      .post(`${this.baseAPI}/auth/register`, payload, { headers })
+      .subscribe({
+        next: (res: any) => {
+          if (res['data']) {
+            this.signUpSubject.next(res);
+          } else {
+            const errorMessage = res['description'];
+            this.signUpSubject.next(errorMessage);
+          }
+        },
+        error: (err: any) => {
+          // scrollTo({ top: 0 });
+          this.signUpSubject.next(err['description']);
+        },
+      });
 
     return this.signUpSubject.asObservable();
   }
 
   verifyEmail(payload: { token: string; userId: string }) {
-    this.http.post(`${this.baseAPI}/auth/Confirm-Email`, payload).subscribe({
-      next: (res: any) => {
-        if (res['userId']) {
-          this.verifyEmailSubject.next(true);
-        } else {
-          const errorMessage = res['description'];
-          this.forgotPasswordSubject.next(errorMessage);
-        }
-      },
-      error: (err) => {
-        // scrollTo({ top: 0 });
-        this.forgotPasswordSubject.next(err['description']);
-      },
-    });
+    let headers = this.headers;
+
+    this.http
+      .post(`${this.baseAPI}/auth/Confirm-Email`, payload, { headers })
+      .subscribe({
+        next: (res: any) => {
+          if (res['userId']) {
+            this.verifyEmailSubject.next(true);
+          } else {
+            const errorMessage = res['description'];
+            this.forgotPasswordSubject.next(errorMessage);
+          }
+        },
+        error: (err) => {
+          // scrollTo({ top: 0 });
+          this.forgotPasswordSubject.next(err['description']);
+        },
+      });
 
     return this.verifyEmailSubject.asObservable();
   }
 
   sendOTP(OtpType: number) {
+    let headers = this.headers;
     const userId = this.cookieStorage.get('userId');
     if (userId) {
       const payload = {
@@ -214,7 +231,9 @@ export class MyLibraryService {
         userId,
       };
       this.http
-        .post<HttpResponse<string>>(`${this.baseAPI}/otp/send-otp`, payload)
+        .post<HttpResponse<string>>(`${this.baseAPI}/otp/send-otp`, payload, {
+          headers,
+        })
         .subscribe({
           next: (res: any) => {
             // scrollTo({ top: 0 });
@@ -245,8 +264,11 @@ export class MyLibraryService {
         token,
         userId,
       };
+      let headers = this.headers;
       this.http
-        .post<LoginData>(`${this.baseAPI}/otp/validate-otp`, payload)
+        .post<LoginData>(`${this.baseAPI}/otp/validate-otp`, payload, {
+          headers,
+        })
         .subscribe({
           next: (res) => {
             // scrollTo({ top: 0 });
@@ -275,10 +297,12 @@ export class MyLibraryService {
     const payload = {
       emailAddress,
     };
-    this.http
+      let headers = this.headers;
+      this.http
       .post<HttpResponse<LoginData>>(
         `${this.baseAPI}/auth/forgot-password`,
-        payload
+        payload,
+        {headers}
       )
       .subscribe({
         next: (res: any) => {
@@ -304,8 +328,9 @@ export class MyLibraryService {
     confirmPassword: string;
     userId: string;
   }) {
-    this.http
-      .post<LoginData>(`${this.baseAPI}/auth/reset-password`, payload)
+      let headers = this.headers;
+      this.http
+      .post<LoginData>(`${this.baseAPI}/auth/reset-password`, payload, {headers})
       .subscribe({
         next: (res) => {
           if (res['data'] === 'Password reset successful.') {
@@ -324,9 +349,5 @@ export class MyLibraryService {
       });
 
     return this.resetPasswordSubject.asObservable();
-  }
-
-  private get redirectURL() {
-    return this.cookieStorage.get('redirectUrl');
   }
 }
