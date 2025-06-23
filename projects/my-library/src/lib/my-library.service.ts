@@ -143,9 +143,10 @@ export class MyLibraryService {
     headers = headers.append('Basic', encodedData);
 
     this.http
-      .post<LoginData>(`${this.baseAPI}/auth/authenticate`, {}, { headers })
+      .post<LoginData>(`${this.baseAPI}/auth/authenticates`, {}, { headers })
       .subscribe({
         next: (res: LoginData) => {
+          console.log(res);
           if (res['userId']) {
             this.setUserDetails(res);
             const userData = res as LoginData;
