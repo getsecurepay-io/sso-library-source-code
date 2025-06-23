@@ -160,7 +160,7 @@ export class MyLibraryService {
         error: (err) => {
           console.log('Login error:', err);
           // scrollTo({ top: 0 });
-          this.loginSubject.error(err['description']);
+          this.loginSubject.error(err);
           this.loginSubject.complete();
         },
       });
