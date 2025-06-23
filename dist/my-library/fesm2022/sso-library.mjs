@@ -165,7 +165,7 @@ class MyLibraryService {
                     this.loginSubject.complete();
                 }
                 else {
-                    const errorMessage = res['description'];
+                    const errorMessage = res?.description || 'Login failed';
                     this.loginSubject.error(errorMessage);
                     console.log('Login error:', errorMessage);
                 }
@@ -202,13 +202,13 @@ class MyLibraryService {
                     this.signUpSubject.next(res);
                 }
                 else {
-                    const errorMessage = res['description'];
+                    const errorMessage = res?.description || 'Failed';
                     this.signUpSubject.next(errorMessage);
                 }
             },
             error: (err) => {
                 // scrollTo({ top: 0 });
-                this.signUpSubject.next(err['description']);
+                this.signUpSubject.next(err?.description || 'Failed');
             },
         });
         return this.signUpSubject.asObservable();
@@ -223,13 +223,13 @@ class MyLibraryService {
                     this.verifyEmailSubject.next(true);
                 }
                 else {
-                    const errorMessage = res['description'];
+                    const errorMessage = res?.description || 'Failed';
                     this.forgotPasswordSubject.next(errorMessage);
                 }
             },
             error: (err) => {
                 // scrollTo({ top: 0 });
-                this.forgotPasswordSubject.next(err['description']);
+                this.forgotPasswordSubject.next(err?.description || 'Failed');
             },
         });
         return this.verifyEmailSubject.asObservable();
@@ -253,13 +253,13 @@ class MyLibraryService {
                         this.sendOTPSubject.next(true);
                     }
                     else {
-                        const errorMessage = res['description'];
+                        const errorMessage = res?.description || 'Failed';
                         this.sendOTPSubject.next(errorMessage);
                     }
                 },
                 error: (err) => {
                     // scrollTo({ top: 0 });
-                    this.sendOTPSubject.next(err['description']);
+                    this.sendOTPSubject.next(err?.description || 'Failed');
                 },
             });
             return this.sendOTPSubject.asObservable();
@@ -287,13 +287,13 @@ class MyLibraryService {
                         this.validateOTPSubject.next(res);
                     }
                     else {
-                        const errorMessage = res['description'];
+                        const errorMessage = res?.description || 'Failed';
                         this.validateOTPSubject.next(errorMessage);
                     }
                 },
                 error: (err) => {
                     // scrollTo({ top: 0 });
-                    this.validateOTPSubject.next(err['description']);
+                    this.validateOTPSubject.next(err?.description || 'Failed');
                 },
             });
             return this.validateOTPSubject.asObservable();
@@ -315,13 +315,13 @@ class MyLibraryService {
                     this.forgotPasswordSubject.next(true);
                 }
                 else {
-                    const errorMessage = res['description'];
+                    const errorMessage = res?.description || 'Failed';
                     this.forgotPasswordSubject.next(errorMessage);
                 }
             },
             error: (err) => {
                 // scrollTo({ top: 0 });
-                this.forgotPasswordSubject.next(err['description']);
+                this.forgotPasswordSubject.next(err?.description || 'Failed');
             },
         });
         return this.forgotPasswordSubject.asObservable();
@@ -340,13 +340,13 @@ class MyLibraryService {
                 }
                 else {
                     // scrollTo({ top: 0 });
-                    const errorMessage = res['description'];
+                    const errorMessage = res?.description || 'Failed';
                     this.resetPasswordSubject.next(errorMessage);
                 }
             },
             error: (err) => {
                 // scrollTo({ top: 0 });
-                this.resetPasswordSubject.next(err['description']);
+                this.resetPasswordSubject.next(err?.description || 'Failed');
             },
         });
         return this.resetPasswordSubject.asObservable();
