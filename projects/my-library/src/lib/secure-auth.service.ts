@@ -142,7 +142,7 @@ export class SecureAuthService {
     headers = headers.append('Basic', encodedData);
 
     this.http
-      .post<LoginData>(`${this.baseAPI}/enticates`, {}, { headers })
+      .post<LoginData>(`${this.baseAPI}/authenticate`, {}, { headers })
       .subscribe({
         next: (res: LoginData) => {
           console.log(res);
