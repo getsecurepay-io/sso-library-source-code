@@ -1,0 +1,8 @@
+/*
+ * Public API Surface of my-library
+ */
+export * from './lib/secure-auth.service';
+// export * from './lib/sso-auth.service';
+// export * from './lib/my-library.module';
+// export * from './lib/interceptors/token.interceptor';
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljLWFwaS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3Byb2plY3RzL215LWxpYnJhcnkvc3JjL3B1YmxpYy1hcGkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7O0dBRUc7QUFFSCxjQUFjLDJCQUEyQixDQUFDO0FBQzFDLDBDQUEwQztBQUMxQywyQ0FBMkM7QUFDM0Msd0RBQXdEIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIFB1YmxpYyBBUEkgU3VyZmFjZSBvZiBteS1saWJyYXJ5XG4gKi9cblxuZXhwb3J0ICogZnJvbSAnLi9saWIvc2VjdXJlLWF1dGguc2VydmljZSc7XG4vLyBleHBvcnQgKiBmcm9tICcuL2xpYi9zc28tYXV0aC5zZXJ2aWNlJztcbi8vIGV4cG9ydCAqIGZyb20gJy4vbGliL215LWxpYnJhcnkubW9kdWxlJztcbi8vIGV4cG9ydCAqIGZyb20gJy4vbGliL2ludGVyY2VwdG9ycy90b2tlbi5pbnRlcmNlcHRvcic7XG4iXX0=
