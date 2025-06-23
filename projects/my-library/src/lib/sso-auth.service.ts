@@ -5,9 +5,8 @@ import { CookieService } from './cookie.service';
 import { HttpResponse, LoginData } from './model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class SSOAuthService {
   private baseAPI = 'https://secureauth.secureid-digital.com.ng/api';
   private signUpSubject = new Subject();
@@ -23,33 +22,33 @@ export class SSOAuthService {
     private readonly cookieStorage: CookieService
   ) {}
 
-  login(payload: { EmailAddress: string; Password: string }) {
-    // Todo: handle login
-    const encodedData = btoa(JSON.stringify(payload));
+  // login(payload: { EmailAddress: string; Password: string }) {
+  //   // Todo: handle login
+  //   const encodedData = btoa(JSON.stringify(payload));
 
-    let headers = new HttpHeaders();
-    headers = headers.append('Basic', encodedData);
+  //   let headers = new HttpHeaders();
+  //   headers = headers.append('Basic', encodedData);
 
-    this.http
-      .post<LoginData>(`${this.baseAPI}/auth/authenticate`, {}, { headers })
-      .subscribe({
-        next: (res: LoginData) => {
-          if (res['userId']) {
-            this.setUserDetails(res);
-            this.loginSubject.next(res);
-          } else {
-            const errorMessage = res['description'];
-            this.loginSubject.next(errorMessage);
-          }
-        },
-        error: (err) => {
-          // scrollTo({ top: 0 });
-          this.loginSubject.next(err['description']);
-        },
-      });
+  //   this.http
+  //     .post<LoginData>(`${this.baseAPI}/auth/authenticate`, {}, { headers })
+  //     .subscribe({
+  //       next: (res: LoginData) => {
+  //         if (res['userId']) {
+  //           this.setUserDetails(res);
+  //           this.loginSubject.next(res);
+  //         } else {
+  //           const errorMessage = res['description'];
+  //           this.loginSubject.next(errorMessage);
+  //         }
+  //       },
+  //       error: (err) => {
+  //         // scrollTo({ top: 0 });
+  //         this.loginSubject.next(err['description']);
+  //       },
+  //     });
 
-    return this.loginSubject.asObservable();
-  }
+  //   return this.loginSubject.asObservable();
+  // }
 
   // setUserDetails(data: LoginData) {
   private setUserDetails(data: any) {
@@ -83,24 +82,23 @@ export class SSOAuthService {
     return this.signUpSubject.asObservable();
   }
 
-  verifyEmail(payload: { token: string, userId: string; }) {
-    this.http.post(`${this.baseAPI}/auth/Confirm-Email`, payload)
-      .subscribe({
-        next: (res: any) => {
-          if (res['userId']) {
-            this.verifyEmailSubject.next(true);
-          } else {
-            const errorMessage = res['description'];
-            this.forgotPasswordSubject.next(errorMessage);
-          }
-        },
-        error: (err) => {
-          // scrollTo({ top: 0 });
-          this.forgotPasswordSubject.next(err['description']);
+  verifyEmail(payload: { token: string; userId: string }) {
+    this.http.post(`${this.baseAPI}/auth/Confirm-Email`, payload).subscribe({
+      next: (res: any) => {
+        if (res['userId']) {
+          this.verifyEmailSubject.next(true);
+        } else {
+          const errorMessage = res['description'];
+          this.forgotPasswordSubject.next(errorMessage);
         }
-      });
+      },
+      error: (err) => {
+        // scrollTo({ top: 0 });
+        this.forgotPasswordSubject.next(err['description']);
+      },
+    });
 
-      return this.verifyEmailSubject.asObservable()
+    return this.verifyEmailSubject.asObservable();
   }
 
   sendOTP(OtpType: number) {
@@ -108,9 +106,10 @@ export class SSOAuthService {
     if (userId) {
       const payload = {
         OtpType,
-        userId
+        userId,
       };
-      this.http.post<HttpResponse<string>>(`${this.baseAPI}/otp/send-otp`, payload)
+      this.http
+        .post<HttpResponse<string>>(`${this.baseAPI}/otp/send-otp`, payload)
         .subscribe({
           next: (res: any) => {
             // scrollTo({ top: 0 });
@@ -124,13 +123,13 @@ export class SSOAuthService {
           error: (err) => {
             // scrollTo({ top: 0 });
             this.sendOTPSubject.next(err['description']);
-          }
+          },
         });
 
-        return this.sendOTPSubject.asObservable()
+      return this.sendOTPSubject.asObservable();
     }
-    this.sendOTPSubject.next(false)
-    return this.sendOTPSubject.asObservable()
+    this.sendOTPSubject.next(false);
+    return this.sendOTPSubject.asObservable();
   }
 
   validateOTP(token: string) {
@@ -139,9 +138,10 @@ export class SSOAuthService {
     if (userId) {
       const payload = {
         token,
-        userId
+        userId,
       };
-      this.http.post<LoginData>(`${this.baseAPI}/otp/validate-otp`, payload)
+      this.http
+        .post<LoginData>(`${this.baseAPI}/otp/validate-otp`, payload)
         .subscribe({
           next: (res) => {
             // scrollTo({ top: 0 });
@@ -156,22 +156,25 @@ export class SSOAuthService {
           error: (err) => {
             // scrollTo({ top: 0 });
             this.validateOTPSubject.next(err['description']);
-          }
+          },
         });
 
-        return this.validateOTPSubject.asObservable();
+      return this.validateOTPSubject.asObservable();
     }
 
     this.validateOTPSubject.next(false);
     return this.validateOTPSubject.asObservable();
-
   }
 
   forgotPassword(emailAddress: string) {
     const payload = {
       emailAddress,
     };
-    this.http.post<HttpResponse<LoginData>>(`${this.baseAPI}/auth/forgot-password`, payload)
+    this.http
+      .post<HttpResponse<LoginData>>(
+        `${this.baseAPI}/auth/forgot-password`,
+        payload
+      )
       .subscribe({
         next: (res: any) => {
           if (res['data']) {
@@ -185,14 +188,19 @@ export class SSOAuthService {
         error: (err) => {
           // scrollTo({ top: 0 });
           this.forgotPasswordSubject.next(err['description']);
-        }
+        },
       });
 
-      return this.forgotPasswordSubject.asObservable()
+    return this.forgotPasswordSubject.asObservable();
   }
 
-  resetPassword(payload: { password: string, confirmPassword: string, userId: string; }) {
-    this.http.post<LoginData>(`${this.baseAPI}/auth/reset-password`, payload)
+  resetPassword(payload: {
+    password: string;
+    confirmPassword: string;
+    userId: string;
+  }) {
+    this.http
+      .post<LoginData>(`${this.baseAPI}/auth/reset-password`, payload)
       .subscribe({
         next: (res) => {
           if (res['data'] === 'Password reset successful.') {
@@ -207,10 +215,10 @@ export class SSOAuthService {
         error: (err) => {
           // scrollTo({ top: 0 });
           this.resetPasswordSubject.next(err['description']);
-        }
+        },
       });
 
-      return this.resetPasswordSubject.asObservable()
+    return this.resetPasswordSubject.asObservable();
   }
 
   get redirectURL() {
