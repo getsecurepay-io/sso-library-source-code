@@ -152,7 +152,7 @@ export class MyLibraryService {
             this.loginSubject.next(userData);
             this.loginSubject.complete();
           } else {
-            const errorMessage = res['description'];
+            const errorMessage = res?.description || 'Login failed';
             this.loginSubject.error(errorMessage);
             console.log('Login error:', errorMessage);
           }
@@ -190,13 +190,13 @@ export class MyLibraryService {
           if (res['data']) {
             this.signUpSubject.next(res);
           } else {
-            const errorMessage = res['description'];
+            const errorMessage = res?.description || 'Failed';
             this.signUpSubject.next(errorMessage);
           }
         },
         error: (err: any) => {
           // scrollTo({ top: 0 });
-          this.signUpSubject.next(err['description']);
+          this.signUpSubject.next(err?.description || 'Failed');
         },
       });
 
@@ -213,13 +213,13 @@ export class MyLibraryService {
           if (res['userId']) {
             this.verifyEmailSubject.next(true);
           } else {
-            const errorMessage = res['description'];
+            const errorMessage = res?.description || 'Failed';
             this.forgotPasswordSubject.next(errorMessage);
           }
         },
         error: (err) => {
           // scrollTo({ top: 0 });
-          this.forgotPasswordSubject.next(err['description']);
+          this.forgotPasswordSubject.next(err?.description || 'Failed');
         },
       });
 
@@ -244,13 +244,13 @@ export class MyLibraryService {
             if (res['userId']) {
               this.sendOTPSubject.next(true);
             } else {
-              const errorMessage = res['description'];
+              const errorMessage = res?.description || 'Failed';
               this.sendOTPSubject.next(errorMessage);
             }
           },
           error: (err) => {
             // scrollTo({ top: 0 });
-            this.sendOTPSubject.next(err['description']);
+            this.sendOTPSubject.next(err?.description || 'Failed');
           },
         });
 
@@ -280,13 +280,13 @@ export class MyLibraryService {
               this.setUserDetails(res);
               this.validateOTPSubject.next(res);
             } else {
-              const errorMessage = res['description'];
+              const errorMessage = res?.description || 'Failed';
               this.validateOTPSubject.next(errorMessage);
             }
           },
           error: (err) => {
             // scrollTo({ top: 0 });
-            this.validateOTPSubject.next(err['description']);
+            this.validateOTPSubject.next(err?.description || 'Failed');
           },
         });
 
@@ -314,13 +314,13 @@ export class MyLibraryService {
             this.setUserDetails(res.data);
             this.forgotPasswordSubject.next(true);
           } else {
-            const errorMessage = res['description'];
+            const errorMessage = res?.description || 'Failed';
             this.forgotPasswordSubject.next(errorMessage);
           }
         },
         error: (err) => {
           // scrollTo({ top: 0 });
-          this.forgotPasswordSubject.next(err['description']);
+          this.forgotPasswordSubject.next(err?.description || 'Failed');
         },
       });
 
@@ -344,13 +344,13 @@ export class MyLibraryService {
             this.resetPasswordSubject.next(true);
           } else {
             // scrollTo({ top: 0 });
-            const errorMessage = res['description'];
+            const errorMessage = res?.description || 'Failed';
             this.resetPasswordSubject.next(errorMessage);
           }
         },
         error: (err) => {
           // scrollTo({ top: 0 });
-          this.resetPasswordSubject.next(err['description']);
+          this.resetPasswordSubject.next(err?.description || 'Failed');
         },
       });
 
