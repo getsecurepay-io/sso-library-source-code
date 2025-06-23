@@ -3,12 +3,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from './cookie.service';
 import { AppParams, HttpResponse, LoginData } from './model';
 import { Observable, Subject } from 'rxjs';
-// import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
-export class MyLibraryService {
+export class SecureAuthService {
   baseAPI = '';
   private signUpSubject = new Subject();
   private loginSubject = new Subject();
@@ -143,7 +142,7 @@ export class MyLibraryService {
     headers = headers.append('Basic', encodedData);
 
     this.http
-      .post<LoginData>(`${this.baseAPI}/auth/authenticates`, {}, { headers })
+      .post<LoginData>(`${this.baseAPI}/enticates`, {}, { headers })
       .subscribe({
         next: (res: LoginData) => {
           console.log(res);
