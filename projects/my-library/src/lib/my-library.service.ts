@@ -10,8 +10,6 @@ import { Observable, Subject } from 'rxjs';
 })
 export class MyLibraryService {
   baseAPI = '';
-  // baseAPI = 'https://secureauth.secureid-digital.com.ng/api';
-  // private baseAPI = environment.baseAPI;
   private signUpSubject = new Subject();
   private loginSubject = new Subject();
   private appSetupSubject = new Subject();
@@ -152,12 +150,14 @@ export class MyLibraryService {
             this.loginSubject.next(userData);
           } else {
             const errorMessage = res['description'];
-            this.loginSubject.next(errorMessage);
+            this.loginSubject.error(errorMessage);
+            this.loginSubject.complete();
           }
         },
         error: (err) => {
           // scrollTo({ top: 0 });
-          this.loginSubject.next(err['description']);
+          this.loginSubject.error(err['description']);
+          this.loginSubject.complete();
         },
       });
 
@@ -297,12 +297,12 @@ export class MyLibraryService {
     const payload = {
       emailAddress,
     };
-      let headers = this.headers;
-      this.http
+    let headers = this.headers;
+    this.http
       .post<HttpResponse<LoginData>>(
         `${this.baseAPI}/auth/forgot-password`,
         payload,
-        {headers}
+        { headers }
       )
       .subscribe({
         next: (res: any) => {
@@ -328,9 +328,11 @@ export class MyLibraryService {
     confirmPassword: string;
     userId: string;
   }) {
-      let headers = this.headers;
-      this.http
-      .post<LoginData>(`${this.baseAPI}/auth/reset-password`, payload, {headers})
+    let headers = this.headers;
+    this.http
+      .post<LoginData>(`${this.baseAPI}/auth/reset-password`, payload, {
+        headers,
+      })
       .subscribe({
         next: (res) => {
           if (res['data'] === 'Password reset successful.') {

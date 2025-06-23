@@ -1,8 +1,0 @@
-/*
- * Public API Surface of my-library
- */
-export * from './lib/my-library.service';
-export * from './lib/my-library.component';
-export * from './lib/my-library.module';
-export * from './lib/interceptors/token.interceptor';
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljLWFwaS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3Byb2plY3RzL215LWxpYnJhcnkvc3JjL3B1YmxpYy1hcGkudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7O0dBRUc7QUFFSCxjQUFjLDBCQUEwQixDQUFDO0FBQ3pDLGNBQWMsNEJBQTRCLENBQUM7QUFDM0MsY0FBYyx5QkFBeUIsQ0FBQztBQUN4QyxjQUFjLHNDQUFzQyxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLypcbiAqIFB1YmxpYyBBUEkgU3VyZmFjZSBvZiBteS1saWJyYXJ5XG4gKi9cblxuZXhwb3J0ICogZnJvbSAnLi9saWIvbXktbGlicmFyeS5zZXJ2aWNlJztcbmV4cG9ydCAqIGZyb20gJy4vbGliL215LWxpYnJhcnkuY29tcG9uZW50JztcbmV4cG9ydCAqIGZyb20gJy4vbGliL215LWxpYnJhcnkubW9kdWxlJztcbmV4cG9ydCAqIGZyb20gJy4vbGliL2ludGVyY2VwdG9ycy90b2tlbi5pbnRlcmNlcHRvcic7XG4iXX0=
