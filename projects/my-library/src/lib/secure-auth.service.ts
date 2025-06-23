@@ -134,18 +134,15 @@ export class SecureAuthService {
   }
 
   login(payload: { EmailAddress: string; Password: string }) {
-    console.log('Yeah, logging works:', payload);
-
     // Todo: handle login
     const encodedData = btoa(JSON.stringify(payload));
     let headers = this.headers;
     headers = headers.append('Basic', encodedData);
 
     this.http
-      .post<LoginData>(`${this.baseAPI}/authenticate`, {}, { headers })
+      .post<LoginData>(`${this.baseAPI}/auth/authenticate`, {}, { headers })
       .subscribe({
         next: (res: LoginData) => {
-          console.log(res);
           if (res['userId']) {
             this.setUserDetails(res);
             const userData = res as LoginData;
@@ -154,11 +151,11 @@ export class SecureAuthService {
           } else {
             const errorMessage = res?.description || 'Login failed';
             this.loginSubject.error(errorMessage);
-            console.log('Login error:', errorMessage);
+            console.log('Login error res:', errorMessage);
           }
         },
         error: (err) => {
-          console.log('Login error:', err);
+          console.log('Login error err:', err);
           // scrollTo({ top: 0 });
           this.loginSubject.error(err);
           this.loginSubject.complete();
