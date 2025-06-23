@@ -135,6 +135,8 @@ export class MyLibraryService {
   }
 
   login(payload: { EmailAddress: string; Password: string }) {
+    console.log('Yeah, logging works:', payload);
+
     // Todo: handle login
     const encodedData = btoa(JSON.stringify(payload));
     let headers = this.headers;
@@ -148,13 +150,15 @@ export class MyLibraryService {
             this.setUserDetails(res);
             const userData = res as LoginData;
             this.loginSubject.next(userData);
+            this.loginSubject.complete();
           } else {
             const errorMessage = res['description'];
             this.loginSubject.error(errorMessage);
-            this.loginSubject.complete();
+            console.log('Login error:', errorMessage);
           }
         },
         error: (err) => {
+          console.log('Login error:', err);
           // scrollTo({ top: 0 });
           this.loginSubject.error(err['description']);
           this.loginSubject.complete();
