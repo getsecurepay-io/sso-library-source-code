@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from './cookie.service';
 import { AppParams, HttpResponse, LoginData } from './model';
-import { map, Observable, Subject } from 'rxjs';
+import { catchError, map, Observable, Subject, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +10,6 @@ import { map, Observable, Subject } from 'rxjs';
 export class SecureAuthService {
   baseAPI = '';
   private signUpSubject = new Subject();
-  private loginSubject = new Subject();
   private appSetupSubject = new Subject();
   private verifyEmailSubject = new Subject();
   private sendOTPSubject = new Subject<boolean>();
@@ -133,38 +132,6 @@ export class SecureAuthService {
     });
   }
 
-  // login(payload: { EmailAddress: string; Password: string }) {
-  //   // Todo: handle login
-  //   const encodedData = btoa(JSON.stringify(payload));
-  //   let headers = this.headers;
-  //   headers = headers.append('Basic', encodedData);
-
-  //   this.http
-  //     .post<LoginData>(`${this.baseAPI}/auth/authenticate`, {}, { headers })
-  //     .subscribe({
-  //       next: (res: LoginData) => {
-  //         if (res['userId']) {
-  //           this.setUserDetails(res);
-  //           const userData = res as LoginData;
-  //           this.loginSubject.next(userData);
-  //           // this.loginSubject.complete();
-  //         } else {
-  //           const errorMessage = res?.description || 'Login failed';
-  //           this.loginSubject.error(errorMessage);
-  //           console.log('Login error res new:', errorMessage);
-  //         }
-  //       },
-  //       error: (err) => {
-  //         console.log('Login error err new:', err);
-  //         // scrollTo({ top: 0 });
-  //         this.loginSubject.error(err);
-  //         // this.loginSubject.complete();
-  //       },
-  //     });
-
-  //   return this.loginSubject.asObservable();
-  // }
-
   // service
   login(payload: { EmailAddress: string; Password: string }) {
     const encoded = btoa(JSON.stringify(payload));
@@ -180,7 +147,10 @@ export class SecureAuthService {
           }
           this.setUserDetails(res);
           return res as LoginData;
-        })
+        }),
+        catchError((err) =>
+          throwError(() => new Error(err?.description || 'Failed'))
+        )
       );
   }
 
@@ -198,149 +168,108 @@ export class SecureAuthService {
   }
 
   signup(payload: any) {
-    let headers = this.headers;
-    this.http
-      .post(`${this.baseAPI}/auth/register`, payload, { headers })
-      .subscribe({
-        next: (res: any) => {
-          if (res['data']) {
-            this.signUpSubject.next(res);
-          } else {
-            const errorMessage = res?.description || 'Failed';
-            this.signUpSubject.next(errorMessage);
-          }
-        },
-        error: (err: any) => {
-          // scrollTo({ top: 0 });
-          this.signUpSubject.next(err?.description || 'Failed');
-        },
-      });
-
-    return this.signUpSubject.asObservable();
+    const headers: HttpHeaders = this.headers;
+    return this.http
+      .post<{ data?: any; description?: string }>(
+        `${this.baseAPI}/auth/register`,
+        payload,
+        { headers }
+      )
+      .pipe(
+        map((res) => {
+          if (!res?.data) throw new Error(res?.description || 'Failed');
+          return res.data; // return created user/info if needed
+        }),
+        catchError((err) =>
+          throwError(() => new Error(err?.description || 'Failed'))
+        )
+      );
   }
 
   verifyEmail(payload: { token: string; userId: string }) {
-    let headers = this.headers;
-
-    this.http
-      .post(`${this.baseAPI}/auth/Confirm-Email`, payload, { headers })
-      .subscribe({
-        next: (res: any) => {
-          if (res['userId']) {
-            this.verifyEmailSubject.next(true);
-          } else {
-            const errorMessage = res?.description || 'Failed';
-            this.forgotPasswordSubject.next(errorMessage);
-          }
-        },
-        error: (err) => {
-          // scrollTo({ top: 0 });
-          this.forgotPasswordSubject.next(err?.description || 'Failed');
-        },
-      });
-
-    return this.verifyEmailSubject.asObservable();
+    const headers: HttpHeaders = this.headers;
+    return this.http
+      .post<{ userId?: string; description?: string }>(
+        `${this.baseAPI}/auth/Confirm-Email`,
+        payload,
+        { headers }
+      )
+      .pipe(
+        map((res) => {
+          if (!res?.userId) throw new Error(res?.description || 'Failed');
+          return true;
+        }),
+        catchError((err) =>
+          throwError(() => new Error(err?.description || 'Failed'))
+        )
+      );
   }
 
   sendOTP(OtpType: number) {
-    let headers = this.headers;
+    const headers: HttpHeaders = this.headers;
     const userId = this.cookieStorage.get('userId');
-    if (userId) {
-      const payload = {
-        OtpType,
-        userId,
-      };
-      this.http
-        .post<HttpResponse<string>>(`${this.baseAPI}/otp/send-otp`, payload, {
-          headers,
-        })
-        .subscribe({
-          next: (res: any) => {
-            // scrollTo({ top: 0 });
-            if (res['userId']) {
-              this.sendOTPSubject.next(true);
-            } else {
-              const errorMessage = res?.description || 'Failed';
-              this.sendOTPSubject.next(errorMessage);
-            }
-          },
-          error: (err) => {
-            // scrollTo({ top: 0 });
-            this.sendOTPSubject.next(err?.description || 'Failed');
-          },
-        });
+    if (!userId) return throwError(() => new Error('No userId'));
+    const payload = { OtpType, userId };
 
-      return this.sendOTPSubject.asObservable();
-    }
-    this.sendOTPSubject.next(false);
-    return this.sendOTPSubject.asObservable();
+    return this.http
+      .post<{ userId?: string; description?: string }>(
+        `${this.baseAPI}/otp/send-otp`,
+        payload,
+        { headers }
+      )
+      .pipe(
+        map((res) => {
+          if (!res?.userId) throw new Error(res?.description || 'Failed');
+          return true;
+        }),
+        catchError((err) =>
+          throwError(() => new Error(err?.description || 'Failed'))
+        )
+      );
   }
 
   validateOTP(token: string) {
     const userId = this.cookieStorage.get('userId');
+    if (!userId) return throwError(() => new Error('No userId'));
+    const headers: HttpHeaders = this.headers;
+    const payload = { token, userId };
 
-    if (userId) {
-      const payload = {
-        token,
-        userId,
-      };
-      let headers = this.headers;
-      this.http
-        .post<LoginData>(`${this.baseAPI}/otp/validate-otp`, payload, {
-          headers,
-        })
-        .subscribe({
-          next: (res) => {
-            // scrollTo({ top: 0 });
-            if (res['token']) {
-              this.setUserDetails(res);
-              this.validateOTPSubject.next(res);
-            } else {
-              const errorMessage = res?.description || 'Failed';
-              this.validateOTPSubject.next(errorMessage);
-            }
-          },
-          error: (err) => {
-            // scrollTo({ top: 0 });
-            this.validateOTPSubject.next(err?.description || 'Failed');
-          },
-        });
-
-      return this.validateOTPSubject.asObservable();
-    }
-
-    this.validateOTPSubject.next(false);
-    return this.validateOTPSubject.asObservable();
+    return this.http
+      .post<LoginData>(`${this.baseAPI}/otp/validate-otp`, payload, { headers })
+      .pipe(
+        map((res) => {
+          if (!res?.token)
+            throw new Error((res as any)?.description || 'Failed');
+          return res;
+        }),
+        tap((res) => this.setUserDetails(res)),
+        catchError((err) =>
+          throwError(() => new Error(err?.description || 'Failed'))
+        )
+      );
   }
 
   forgotPassword(emailAddress: string) {
-    const payload = {
-      emailAddress,
-    };
-    let headers = this.headers;
-    this.http
-      .post<HttpResponse<LoginData>>(
+    const headers: HttpHeaders = this.headers;
+    const payload = { emailAddress };
+
+    return this.http
+      .post<{ data?: LoginData; description?: string }>(
         `${this.baseAPI}/auth/forgot-password`,
         payload,
         { headers }
       )
-      .subscribe({
-        next: (res: any) => {
-          if (res['data']) {
-            this.setUserDetails(res.data);
-            this.forgotPasswordSubject.next(true);
-          } else {
-            const errorMessage = res?.description || 'Failed';
-            this.forgotPasswordSubject.next(errorMessage);
-          }
-        },
-        error: (err) => {
-          // scrollTo({ top: 0 });
-          this.forgotPasswordSubject.next(err?.description || 'Failed');
-        },
-      });
-
-    return this.forgotPasswordSubject.asObservable();
+      .pipe(
+        map((res) => {
+          if (!res?.data) throw new Error(res?.description || 'Failed');
+          // keep or drop this based on your flow; original code set details here:
+          this.setUserDetails(res.data);
+          return true;
+        }),
+        catchError((err) =>
+          throwError(() => new Error(err?.description || 'Failed'))
+        )
+      );
   }
 
   resetPassword(payload: {
@@ -348,28 +277,26 @@ export class SecureAuthService {
     confirmPassword: string;
     userId: string;
   }) {
-    let headers = this.headers;
-    this.http
-      .post<LoginData>(`${this.baseAPI}/auth/reset-password`, payload, {
-        headers,
-      })
-      .subscribe({
-        next: (res) => {
-          if (res['data'] === 'Password reset successful.') {
-            this.setUserDetails(res.data);
-            this.resetPasswordSubject.next(true);
-          } else {
-            // scrollTo({ top: 0 });
-            const errorMessage = res?.description || 'Failed';
-            this.resetPasswordSubject.next(errorMessage);
-          }
-        },
-        error: (err) => {
-          // scrollTo({ top: 0 });
-          this.resetPasswordSubject.next(err?.description || 'Failed');
-        },
-      });
+    const headers: HttpHeaders = this.headers;
 
-    return this.resetPasswordSubject.asObservable();
+    return this.http
+      .post<{ data?: unknown; description?: string }>(
+        `${this.baseAPI}/auth/reset-password`,
+        payload,
+        { headers }
+      )
+      .pipe(
+        map((res) => {
+          // if API returns a string message in data:
+          if (res?.data === 'Password reset successful.') return true;
+          // or if API returns a boolean flag:
+          if (res?.data === true) return true;
+          // or throw with backend message
+          throw new Error(res?.description || 'Failed');
+        }),
+        catchError((err) =>
+          throwError(() => new Error(err?.description || 'Failed'))
+        )
+      );
   }
 }
