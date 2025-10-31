@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CookieService } from './cookie.service';
 import { AppParams, HttpResponse, LoginData } from './model';
-import { Observable, Subject } from 'rxjs';
+import { map, Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -133,36 +133,55 @@ export class SecureAuthService {
     });
   }
 
+  // login(payload: { EmailAddress: string; Password: string }) {
+  //   // Todo: handle login
+  //   const encodedData = btoa(JSON.stringify(payload));
+  //   let headers = this.headers;
+  //   headers = headers.append('Basic', encodedData);
+
+  //   this.http
+  //     .post<LoginData>(`${this.baseAPI}/auth/authenticate`, {}, { headers })
+  //     .subscribe({
+  //       next: (res: LoginData) => {
+  //         if (res['userId']) {
+  //           this.setUserDetails(res);
+  //           const userData = res as LoginData;
+  //           this.loginSubject.next(userData);
+  //           // this.loginSubject.complete();
+  //         } else {
+  //           const errorMessage = res?.description || 'Login failed';
+  //           this.loginSubject.error(errorMessage);
+  //           console.log('Login error res new:', errorMessage);
+  //         }
+  //       },
+  //       error: (err) => {
+  //         console.log('Login error err new:', err);
+  //         // scrollTo({ top: 0 });
+  //         this.loginSubject.error(err);
+  //         // this.loginSubject.complete();
+  //       },
+  //     });
+
+  //   return this.loginSubject.asObservable();
+  // }
+
+  // service
   login(payload: { EmailAddress: string; Password: string }) {
-    // Todo: handle login
-    const encodedData = btoa(JSON.stringify(payload));
-    let headers = this.headers;
-    headers = headers.append('Basic', encodedData);
+    const encoded = btoa(JSON.stringify(payload));
+    const headers = this.headers.set('Authorization', `Basic ${encoded}`); // or keep your header name if required
 
-    this.http
+    return this.http
       .post<LoginData>(`${this.baseAPI}/auth/authenticate`, {}, { headers })
-      .subscribe({
-        next: (res: LoginData) => {
-          if (res['userId']) {
-            this.setUserDetails(res);
-            const userData = res as LoginData;
-            this.loginSubject.next(userData);
-            // this.loginSubject.complete();
-          } else {
-            const errorMessage = res?.description || 'Login failed';
-            this.loginSubject.error(errorMessage);
-            console.log('Login error res new:', errorMessage);
+      .pipe(
+        // validate response
+        map((res) => {
+          if (!res?.userId) {
+            throw new Error(res?.description || 'Login failed');
           }
-        },
-        error: (err) => {
-          console.log('Login error err new:', err);
-          // scrollTo({ top: 0 });
-          this.loginSubject.error(err);
-          // this.loginSubject.complete();
-        },
-      });
-
-    return this.loginSubject.asObservable();
+          this.setUserDetails(res);
+          return res as LoginData;
+        })
+      );
   }
 
   // setUserDetails(data: LoginData) {
