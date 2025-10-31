@@ -151,11 +151,11 @@ export class SecureAuthService {
           } else {
             const errorMessage = res?.description || 'Login failed';
             this.loginSubject.error(errorMessage);
-            console.log('Login error res:', errorMessage);
+            console.log('Login error res new:', errorMessage);
           }
         },
         error: (err) => {
-          console.log('Login error err:', err);
+          console.log('Login error err new:', err);
           // scrollTo({ top: 0 });
           this.loginSubject.error(err);
           // this.loginSubject.complete();
