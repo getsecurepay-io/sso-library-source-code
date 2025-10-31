@@ -147,7 +147,7 @@ export class SecureAuthService {
             this.setUserDetails(res);
             const userData = res as LoginData;
             this.loginSubject.next(userData);
-            this.loginSubject.complete();
+            // this.loginSubject.complete();
           } else {
             const errorMessage = res?.description || 'Login failed';
             this.loginSubject.error(errorMessage);
@@ -158,7 +158,7 @@ export class SecureAuthService {
           console.log('Login error err:', err);
           // scrollTo({ top: 0 });
           this.loginSubject.error(err);
-          this.loginSubject.complete();
+          // this.loginSubject.complete();
         },
       });
 
