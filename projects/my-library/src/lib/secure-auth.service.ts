@@ -134,8 +134,9 @@ export class SecureAuthService {
 
   // service
   login(payload: { EmailAddress: string; Password: string }) {
-    const encoded = btoa(JSON.stringify(payload));
-    const headers = this.headers.set('Authorization', `Basic ${encoded}`); // or keep your header name if required
+    const encodedData = btoa(JSON.stringify(payload));
+    let headers = this.headers;
+    headers = headers.append('Basic', encodedData);
 
     return this.http
       .post<LoginData>(`${this.baseAPI}/auth/authenticate`, {}, { headers })
